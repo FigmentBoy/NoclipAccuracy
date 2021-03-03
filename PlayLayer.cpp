@@ -9,6 +9,15 @@ int PlayLayer::deaths = 0;
 float PlayLayer::totalDelta = 0;
 float PlayLayer::prevX = 0;
 
+void WriteBytes(void* location, std::vector<BYTE> bytes) {
+	DWORD old_prot;
+	VirtualProtect(location, bytes.size(), PAGE_EXECUTE_READWRITE, &old_prot);
+
+	memcpy(location, bytes.data(), bytes.size());
+
+	VirtualProtect(location, bytes.size(), old_prot, &old_prot);
+}
+
 std::string getAccuracyText() {
 	if (PlayLayer::frames == 0) return "Accuracy: 100.00%";
 	float p = (float)(PlayLayer::frames - PlayLayer::deaths) / (float)PlayLayer::frames;
@@ -34,6 +43,16 @@ bool __fastcall PlayLayer::initHook(CCLayer* self, int edx, void* GJGameLevel) {
 		textObj->setPosition({ size.width / 2 + 3, size.height / 2 + 3});
 
 		self->addChild(textObj);
+
+		WriteBytes((void*)(base + 0x20A23C), { 0xE9, 0x79, 0x06, 0x00, 0x00 });
+		WriteBytes((void*)(base + 0x1E9F6B), { 0xE9, 0x13, 0x02, 0x00, 0x00, 0x90 });
+		WriteBytes((void*)(base + 0x1EA195), { 0xE9, 0x22, 0x01, 0x00, 0x00, 0x90 });
+	}
+	else {
+		WriteBytes((void*)(base + 0x20A23C), { 0x6A, 0x14, 0x8B, 0xCB, 0xFF });
+		WriteBytes((void*)(base + 0x1E9F6B), { 0x0F, 0x84, 0x12, 0x02, 0x00, 0x00 });
+		WriteBytes((void*)(base + 0x1EA195), { 0x0F, 0x8B, 0x21, 0x01, 0x00, 0x00 });
+
 	}
 	return init(self, GJGameLevel);
 }
@@ -61,7 +80,7 @@ void __fastcall PlayLayer::hkUpdate(cocos2d::CCLayer* self, void* edx, float del
 
 	if (wouldDie) {
 		wouldDie = false;
-		if (totalDelta >= 0.1) {
+		if (totalDelta >= 0.1 && x != prevX) {
 			deaths += 1;
 		}
 	}
@@ -86,24 +105,15 @@ int __fastcall PlayLayer::hkDeath(void* self, void*, void* go, void* powerranger
 	size_t base = (size_t)GetModuleHandle(0);
 
 	if (GameManager::getGameVariable(*(void**)(base + 0x3222d0), "noclip")) {
-
-		uintptr_t address = base + 0x20A8Ba;
-
 		wouldDie = true;
-		__asm {
-			mov eax, address
-			jmp eax
-		}
 	}
-	else {
-		return death(self, go, powerrangers);
-	}
+
 	
+	return death(self, go, powerrangers);	
 }
 
 void PlayLayer::mem_init() {
 	size_t base = (size_t)GetModuleHandle(0);
-
 	MH_CreateHook(
 		(PVOID)(base + 0x01FB780),
 		PlayLayer::initHook,
