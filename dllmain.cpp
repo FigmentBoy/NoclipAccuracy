@@ -5,9 +5,9 @@
 #include "PlayLayer.h"
 
 DWORD WINAPI my_thread(void* hModule) {
-    AllocConsole();
+    /*AllocConsole();
     SetConsoleTitleA("zBot Console");
-    freopen_s(reinterpret_cast<FILE**>(stdout), "CONOUT$", "w", stdout);
+    freopen_s(reinterpret_cast<FILE**>(stdout), "CONOUT$", "w", stdout);*/
 
     MH_Initialize();
     PlayLayer::mem_init();

@@ -31,8 +31,7 @@ int __fastcall PlayLayer::hkResetLevel(void* self) {
 	deaths = 0;
 	wouldDie = false;
 
-	CCLayer* layer = (CCLayer*)self;
-	layer->removeChildByTag(100000);
+	CCDirector::sharedDirector()->getRunningScene()->removeChildByTag(100000);
 
 	return resetLevel(self);
 }
