@@ -14,9 +14,6 @@ namespace PlayLayer {
 	inline int(__thiscall* resetLevel)(void* self);
 	int __fastcall hkResetLevel(void* self);
 
-	inline bool(__thiscall* levelComplete)(void* self);
-	bool __fastcall hkLevelComplete(void* self);
-
 	inline int(__thiscall* death)(void* self, void* go, void* powerrangers);
 	int __fastcall hkDeath(void* self, void*, void* go, void* powerrangers);
 

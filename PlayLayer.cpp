@@ -1,21 +1,21 @@
 #include "PlayLayer.h"
 #include "GameManager.h"
 #include "MinHook.h"
+#include <iomanip>
+
 bool PlayLayer::wouldDie = false;
 int PlayLayer::frames = 0;
 int PlayLayer::deaths = 0;
 float PlayLayer::totalDelta = 0;
 float PlayLayer::prevX = 0;
 
-void WriteBytes(void* location, std::vector<BYTE> bytes) {
-	DWORD old_prot;
-	VirtualProtect(location, bytes.size(), PAGE_EXECUTE_READWRITE, &old_prot);
-
-	memcpy(location, bytes.data(), bytes.size());
-
-	VirtualProtect(location, bytes.size(), old_prot, &old_prot);
+std::string getAccuracyText() {
+	if (PlayLayer::frames == 0) return "Accuracy: 100.00%";
+	float p = (float)(PlayLayer::frames - PlayLayer::deaths) / (float)PlayLayer::frames;
+	std::stringstream stream;
+	stream << "Accuracy: " << std::fixed << std::setprecision(2) << p * 100.f << "%";
+	return stream.str();
 }
-
 
 bool __fastcall PlayLayer::initHook(CCLayer* self, int edx, void* GJGameLevel) {
 	size_t base = (size_t)GetModuleHandle(0);
@@ -23,8 +23,7 @@ bool __fastcall PlayLayer::initHook(CCLayer* self, int edx, void* GJGameLevel) {
 	prevX = 0;
 
 	if (GameManager::getGameVariable(*(void**)(base + 0x3222d0), "noclip")) {
-		std::string text = std::string("Accuracy: 100%");
-		CCLabelBMFont* textObj = CCLabelBMFont::create(text.c_str(), "Resources\\goldFont-uhd.fnt");
+		CCLabelBMFont* textObj = CCLabelBMFont::create("Accuracy: 100.00%", "goldFont.fnt");
 
 		textObj->setZOrder(1000);
 		textObj->setTag(100000);
@@ -32,8 +31,7 @@ bool __fastcall PlayLayer::initHook(CCLayer* self, int edx, void* GJGameLevel) {
 		textObj->setScale(0.5);
 		auto size = textObj->getScaledContentSize();
 
-		textObj->setPositionX(size.width);
-		textObj->setPositionY(size.height);
+		textObj->setPosition({ size.width / 2 + 3, size.height / 2 + 3});
 
 		self->addChild(textObj);
 	}
@@ -52,13 +50,12 @@ void __fastcall PlayLayer::hkUpdate(cocos2d::CCLayer* self, void* edx, float del
 	size_t base = (size_t)GetModuleHandle(0);
 
 	if (GameManager::getGameVariable(*(void**)(base + 0x3222d0), "noclip")) {
-		std::string text = std::string("Accuracy: ") + std::to_string(100 * ((float)(frames - deaths) / (float)frames)) + "%";
-		if (frames == 0) {
-			text = std::string("Accuracy: 100%");
-		}
-
 		CCLabelBMFont* textObj = (CCLabelBMFont*)self->getChildByTag(100000);
-		textObj->setCString(text.c_str());
+		auto text = getAccuracyText();
+		textObj->setString(text.c_str());
+		auto size = textObj->getScaledContentSize();
+
+		textObj->setPosition({ size.width / 2 + 3, size.height / 2 + 3});
 	}
 
 
@@ -83,27 +80,6 @@ int __fastcall PlayLayer::hkResetLevel(void* self) {
 	wouldDie = false;
 
 	return res;
-}
-
-
-
-bool __fastcall PlayLayer::hkLevelComplete(void* self) {
-	std::string text = std::string("Accuracy: ") + std::to_string(100*((float)(frames - deaths) / (float)frames)) + "%";
-	CCLabelBMFont* textObj = CCLabelBMFont::create(text.c_str(), "Resources\\goldFont-uhd.fnt");
-
-	textObj->setZOrder(1000);
-	textObj->setTag(100000);
-	
-	auto window = CCDirector::sharedDirector()->getWinSize();
-
-	textObj->setPositionX(window.width / 2);
-	textObj->setPositionY(window.height - 40);
-
-	size_t base = (size_t)GetModuleHandle(0);
-
-	
-
-	return PlayLayer::levelComplete(self);
 }
 
 int __fastcall PlayLayer::hkDeath(void* self, void*, void* go, void* powerrangers) {
@@ -147,9 +123,4 @@ void PlayLayer::mem_init() {
 		(PVOID)(base + 0x2029C0),
 		PlayLayer::hkUpdate,
 		(LPVOID*)&PlayLayer::update);
-
-	MH_CreateHook(
-		(PVOID)(base + 0x1FD3D0),
-		PlayLayer::hkLevelComplete,
-		(LPVOID*)&PlayLayer::levelComplete);
 }
