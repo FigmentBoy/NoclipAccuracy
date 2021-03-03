@@ -533,9 +533,9 @@
     <ClInclude Include="cappuccino-sdk\incl\extensions\spine\SlotData.h" />
     <ClInclude Include="cappuccino-sdk\incl\extensions\spine\spine-cocos2dx.h" />
     <ClInclude Include="cappuccino-sdk\incl\extensions\spine\spine.h" />
-    <ClInclude Include="framework.h" />
+    <ClInclude Include="GameManager.h" />
+    <ClInclude Include="MenuOptions.h" />
     <ClInclude Include="MinHook.h" />
-    <ClInclude Include="pch.h" />
     <ClInclude Include="PlayLayer.h" />
   </ItemGroup>
   <ItemGroup>
@@ -555,7 +555,8 @@
     <ClCompile Include="cappuccino-sdk\incl\cocos2dx\kazmath\src\vec3.c" />
     <ClCompile Include="cappuccino-sdk\incl\cocos2dx\kazmath\src\vec4.c" />
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="MenuOptions.cpp" />
     <ClCompile Include="PlayLayer.cpp" />
   </ItemGroup>
   <ItemGroup>
