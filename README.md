@@ -1,3 +1,3 @@
 # NoclipAccuracy Credits
-- All code written by Figment
+- By Figment
 - Bugtesting and ideas: MindCap, Matcool
